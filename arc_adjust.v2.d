@@ -14,7 +14,7 @@ value from kstat data: `arc_stats.arcstat_meta_used.value.ui64. */
             `arc_stats.arcstat_c.value.ui64,
             `arc_anon->arcs_size,
             `arc_mru->arcs_size,
-            `arc_stats.arcstat_meta_used.value.ui64,,
+            `arc_stats.arcstat_meta_used.value.ui64,
             `arc_stats.arcstat_p.value.ui64);
     printf("arc_mfu.size = %d, arc_mfu_ghost.size = %d, arc_mru_ghost.size = %d, arc_l2c_only.size = %d\n",
             `arc_mfu->arcs_size,
