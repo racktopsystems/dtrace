@@ -1,5 +1,6 @@
 #!/usr/sbin/dtrace -s
 #pragma D option quiet
+#pragma D option destructive
 
 arc_adjust:entry
 /* Adjusted slightly to work on smartOS. Had to replace global `arc_meta_used var with
