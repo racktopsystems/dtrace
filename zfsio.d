@@ -7,7 +7,7 @@
  * only be used for comparative analysis. */
 /* Author: Kirill.Davydychev@Nexenta.com */
 /* Copyright 2012, Nexenta Systems, Inc. All rights reserved. */
-/* Version: 0.3b */
+/* Version: 0.4b */
 
 dmu_buf_hold_array_by_dnode:entry
 /args[0]->dn_objset->os_dsl_dataset && args[3]/ /* Reads */
@@ -35,7 +35,7 @@ dmu_buf_hold_array_by_dnode:entry
 
 tick-1sec
 {
-        printf("                                          operations       bandwidth           blocksize\n");
+        printf("%Y                      operations       bandwidth           blocksize\n",walltimestamp);
         printf("Dataset                                  read   write  read       write      read   write\n");
         printf("                                         ------ ------ ---------- ---------- ------ ------\n");
         printa("%-40s %@-6d %@-6d %@-10d %@-10d %@-6d %@-6d\n",@ior,@iow,@tpr,@tpw,@bsr,@bsw);
