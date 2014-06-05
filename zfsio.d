@@ -3,7 +3,7 @@
 
 /* Description: This script will show read/write IOPs and throughput for ZFS
  * filesystems and zvols on a per-dataset basis. It can be used to estimate
- * which dataset is causing the most I/O load on the current system. It should 
+ * which dataset is causing the most I/O load on the current system. It should
  * only be used for comparative analysis. */
 /* Author: Kirill.Davydychev@Nexenta.com */
 /* Copyright 2012, Nexenta Systems, Inc. All rights reserved. */
@@ -18,7 +18,7 @@ dmu_buf_hold_array_by_dnode:entry
         @ior[this->path] = count();
         @tpr[this->path] = sum(args[2]);
         @bsr[this->path] = avg(args[2]);
-        @distr[strjoin(this->path, " Reads")] = quantize(args[2]);
+        @distr[this->path, "Reads"] = quantize(args[2]);
 }
 
 dmu_buf_hold_array_by_dnode:entry
@@ -30,7 +30,7 @@ dmu_buf_hold_array_by_dnode:entry
         @iow[this->path] = count();
         @tpw[this->path] = sum(args[2]);
         @bsw[this->path] = avg(args[2]);
-        @distw[strjoin(this->path, " Writes")] = quantize(args[2]);
+        @distw[this->path, "Writes"] = quantize(args[2]);
 }
 
 tick-1sec,END
@@ -43,4 +43,10 @@ tick-1sec,END
      /* clear(@ior); clear(@tpr); clear(@iow); clear(@tpw); clear(@bsr); clear(@bsw);*/
      /* TODO: Make script more interactive. Above, uncomment clear() and comment trunc() line in order to change
         truncate behavior, or comment out both lines to get cumulative stats. */
+}
+
+END
+{
+    printa("%40s                %8s %@d\n", @distr);
+    printa("%40s                %8s %@d\n", @distw);
 }
