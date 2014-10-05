@@ -30,7 +30,7 @@ data analysis software like R, Matlab, etc. The output is comma separated to eas
 the loading of the data into analytics tools. Within RackTop we use this tool
 quite commonly to get some sense from customer systems about what their disks are
 doing. Warning!!! If the system has a large number of disks, more than a couple,
-this script will return large amounts of information, potentially hundreds of 
+this script will return large amounts of information, potentially hundreds of
 thousands if not millions of lines in a relatively short amount of time. It is best
 to send stdout from this script into a file instead of to screen.
 */
@@ -47,55 +47,61 @@ io:::start
     start_time[args[0]->b_blkno] = timestamp;
     /* Storing buffer size to make sure that io:::done probes are triggered
     only when this value is greater than 0 */
-    trig = args[0]->b_bufsize;
+    trig[args[0]->b_blkno] = args[0]->b_bufsize;
 }
 
 io:::done
-/(args[0]->b_flags & B_READ) && (this->start = start_time[args[0]->b_blkno]) && trig > 0/
+/(args[0]->b_flags & B_READ) && (this->start = start_time[args[0]->b_blkno]) && trig[args[0]->b_blkno] > 0/
 {
 	this->size = args[0]->b_bcount;
     this->delta = (timestamp - this->start) / 1000;
-    /* @avgIO[(walltimestamp / 1000000000), 
+    /* @avgIO[(walltimestamp / 1000000000),
         "READ", args[1]->dev_statname, this->size] = avg(this->delta); */
-    @sumIO[(walltimestamp / 1000000000), 
+    @sumIO[(walltimestamp / 1000000000),
         "READ", args[1]->dev_statname] = sum(this->size);
     /* Figure out average byte size */
     @bsize["average READ, bytes"] = avg(this->size);
+    @btotal["sum READ bytes"] = sum(this->size);
     @latencyUS["READ I/O, us"] = quantize(this->delta);
-    @avgs["average READ I/O, us"] = avg(this->delta); 
+    @avgs["average READ I/O, us"] = avg(this->delta);
     start_time[args[0]->b_blkno] = 0;
-    trig = 0;
+    trig[args[0]->b_blkno] = 0;
 }
 
 io:::done
-/!(args[0]->b_flags & B_READ) && (this->start = start_time[args[0]->b_blkno]) && trig > 0/
+/!(args[0]->b_flags & B_READ) && (this->start = start_time[args[0]->b_blkno]) && trig[args[0]->b_blkno] > 0/
 {
 	this->size = args[0]->b_bcount;
     this->delta = (timestamp - this->start) / 1000;
-    /* @avgIO[(walltimestamp / 1000000000), 
-        "WRITE", args[1]->dev_statname, this->size] = avg(this->delta); */
+    /* @avgIO[(walltimestamp / 1000000000),
+        "sum WRITE", args[1]->dev_statname, this->size] = avg(this->delta); */
     @sumIO[(walltimestamp / 1000000000),
         "WRITE", args[1]->dev_statname] = sum(this->size);
     /* Figure out average byte size */
     @bsize["average WRITE, bytes"] = avg(this->size);
+    @btotal["sum WRITE bytes"] = sum(this->size);
     @latencyUS["WRITE I/O, us"] = quantize(this->delta);
-    @avgs["average WRITE I/O, us"] = avg(this->delta); 
+    @avgs["average WRITE I/O, us"] = avg(this->delta);
     start_time[args[0]->b_blkno] = 0;
-    trig = 0;
+    trig[args[0]->b_blkno] = 0;
+    this->size = 0;
+    this->delta = 0;
+
 }
 
 :::tick-1sec
-{ /* Every 1 seconds we print one or more lines for each disk 
+{ /* Every 1 seconds we print one or more lines for each disk
 	giving a summary of the IO, one line per type of IO, i.e. Read/Write. */
 	printa("%d,%s,%s,%@d\n", @sumIO);
 	trunc(@sumIO);
 }
 
 dtrace:::END
-{ /* Summary printed at the end, when control-c is entered, 
+{ /* Summary printed at the end, when control-c is entered,
 	for human consumption. */
     printf("\nI/O completed time and size summary:\n\n");
     printa("\t%s     %@d\n", @avgs);
     printa("\t%s     %@d\n", @bsize);
+    printa("\t%s     %@d\n", @btotal);
     printa("\n   %s\n%@d\n", @latencyUS);
 }
