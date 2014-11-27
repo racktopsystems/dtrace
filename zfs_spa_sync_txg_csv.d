@@ -3,7 +3,7 @@
 /*
 The MIT License (MIT)
 
-Copyright (c) 2013 RackTop Systems
+Copyright (c) 2014 RackTop Systems
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -37,7 +37,6 @@ the IO is going, and generally what size of each transaction is by spa (pool).
 inline int SYNCING = 1;
 inline int CONVERT_MS = 1000000;
 inline int MB = 1 << 20;
-inline int CONVERT_S = 1000000000;
 inline int IGNORE = -1; /* If function returns almost immediately ignore it! */
 
 BEGIN{
